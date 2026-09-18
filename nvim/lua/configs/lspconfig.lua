@@ -60,4 +60,3 @@ vim.lsp.config("clangd", { -- nvim 0.11
     on_init = on_init,
     capabilities = capabilities,
 })
--- read :h vim.lsp.config for changing options of lsp servers

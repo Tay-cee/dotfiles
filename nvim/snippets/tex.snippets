@@ -1,0 +1,97 @@
+snippet assigment "Assigment Template"
+  \documentclass[11pt]{exam}
+  \newcommand{\myname}{Name}
+  \newcommand{\myhwtype}{Assignment num}
+  \newcommand{\myclass}{Class}
+
+  \newcommand{\questiontype}{Question}
+
+  \newcommand{\writtensection}{0}
+
+  \usepackage{amsmath, amsfonts, amsthm, amssymb}
+  \usepackage{enumerate}
+  \usepackage{enumitem}
+  \usepackage{graphicx}
+  \usepackage{hyperref}
+  \usepackage[T1]{fontenc}
+  \usepackage{caption}
+  \usepackage{float}
+
+  \usepackage{centernot}
+  \usepackage{mathtools}
+  \usepackage{pgfplots}
+  \usepackage{pgf-pie}
+
+  \pgfplotsset{compat=1.18}
+  \usepgfplotslibrary{statistics}
+  \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+  \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+  \DeclarePairedDelimiter{\card}{\vert}{\vert}
+
+  \setlength{\parindent}{0pt}
+  \setlength{\parskip}{5pt plus 1pt}
+  \pagestyle{empty}
+
+  \def\indented#1{\list{}{}\item[]}
+  \let\indented=\endlist
+
+  \newcounter{questionCounter}
+  \newcounter{partCounter}[questionCounter]
+
+  \newenvironment{namedquestion}[1][\arabic{questionCounter}]{%
+      \addtocounter{questionCounter}{1}%
+      \setcounter{partCounter}{0}%
+      \vspace{.2in}%
+          \noindent{\bf #1}%
+      \vspace{0.3em} \hrule \vspace{.1in}%
+  }{}
+
+  \newenvironment{numedquestion}[0]{%
+      \stepcounter{questionCounter}%
+      \vspace{.2in}%
+          \ifx\writtensection\undefined
+          \noindent{\bf \questiontype \; \arabic{questionCounter}. }%
+          \else
+            \if\writtensection0
+            \noindent{\bf \questiontype \; \arabic{questionCounter}. }%
+            \else
+            \noindent{\bf \questiontype \; \writtensection.\arabic{questionCounter} }%
+          \fi
+      \vspace{0.3em} \hrule \vspace{.1in}%
+  }{}
+
+  \newenvironment{alphaparts}[0]{%
+    \begin{enumerate}[label=\textbf{(\alph*)}]
+  }{\end{enumerate}}
+
+  \newenvironment{arabicparts}[0]{%
+    \begin{enumerate}[label=\textbf{\arabic{questionCounter}.\arabic*})]
+  }{\end{enumerate}}
+
+  \newenvironment{questionpart}[0]{%
+    \item
+  }{}
+
+  \newcommand{\answerbox}[1]{
+  \begin{framed}
+  \vspace{#1}
+  \end{framed}}
+
+  \pagestyle{head}
+
+  \headrule
+  \header{\textbf{\myclass}}%
+  {\textbf{\myname}}%
+  {\textbf{\myhwtype}}
+
+  \begin{document}
+      \thispagestyle{plain}
+      \begin{center}
+        {\Large \myclass{} \myhwtype{}} \\
+        \myname{}\\
+        \today
+      \end{center}
+      
+      \begin{numedquestion}
+      \end{numedquestion} 
+  \end{document} 
