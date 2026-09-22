@@ -1,7 +1,7 @@
 snippet assigment "Assigment Template"
   \documentclass[11pt]{exam}
   \newcommand{\myname}{Name}
-  \newcommand{\myhwtype}{Assignment num}
+  \newcommand{\myhwtype}{Assignment n}
   \newcommand{\myclass}{Class}
 
   \newcommand{\questiontype}{Question}
@@ -9,19 +9,18 @@ snippet assigment "Assigment Template"
   \newcommand{\writtensection}{0}
 
   \usepackage{amsmath, amsfonts, amsthm, amssymb}
-  \usepackage{enumerate}
   \usepackage{enumitem}
   \usepackage{graphicx}
-  \usepackage{hyperref}
   \usepackage[T1]{fontenc}
   \usepackage{caption}
   \usepackage{float}
-  \usepackage{cmt}
+  \usepackage{framed}
 
   \usepackage{centernot}
   \usepackage{mathtools}
   \usepackage{pgfplots}
   \usepackage{pgf-pie}
+  \usepackage{hyperref} % load hyperref last
 
   \pgfplotsset{compat=1.18}
   \usepgfplotslibrary{statistics}
@@ -31,10 +30,9 @@ snippet assigment "Assigment Template"
 
   \setlength{\parindent}{0pt}
   \setlength{\parskip}{5pt plus 1pt}
-  \pagestyle{empty}
 
-  \def\indented#1{\list{}{}\item[]}
-  \let\indented=\endlist
+  \def\indented{\list{}{}\item[]}
+  \let\endindented=\endlist
 
   \newcounter{questionCounter}
   \newcounter{partCounter}[questionCounter]
@@ -43,56 +41,57 @@ snippet assigment "Assigment Template"
       \addtocounter{questionCounter}{1}%
       \setcounter{partCounter}{0}%
       \vspace{.2in}%
-          \noindent{\bf #1}%
+      \noindent{\bf #1}%
       \vspace{0.3em} \hrule \vspace{.1in}%
   }{}
 
-  \newenvironment{numedquestion}[0]{%
+  \newenvironment{numedquestion}{%
       \stepcounter{questionCounter}%
       \vspace{.2in}%
-          \ifx\writtensection\undefined
+      \ifx\writtensection\undefined
           \noindent{\bf \questiontype \; \arabic{questionCounter}. }%
+      \else
+          \if\writtensection0
+              \noindent{\bf \questiontype \; \arabic{questionCounter}. }%
           \else
-            \if\writtensection0
-            \noindent{\bf \questiontype \; \arabic{questionCounter}. }%
-            \else
-            \noindent{\bf \questiontype \; \writtensection.\arabic{questionCounter} }%
+              \noindent{\bf \questiontype \; \writtensection.\arabic{questionCounter} }%
           \fi
+      \fi
       \vspace{0.3em} \hrule \vspace{.1in}%
   }{}
 
-  \newenvironment{alphaparts}[0]{%
+  \newenvironment{alphaparts}{%
     \begin{enumerate}[label=\textbf{(\alph*)}]
   }{\end{enumerate}}
 
-  \newenvironment{arabicparts}[0]{%
-    \begin{enumerate}[label=\textbf{\arabic{questionCounter}.\arabic*})]
+  \newenvironment{arabicparts}{%
+    \begin{enumerate}[label=\textbf{\arabic{questionCounter}.\arabic*)}]
   }{\end{enumerate}}
 
-  \newenvironment{questionpart}[0]{%
+  \newenvironment{questionpart}{%
     \item
   }{}
 
-  \newcommand{\answerbox}[1]{
+  \newcommand{\answerbox}[1]{%
   \begin{framed}
   \vspace{#1}
   \end{framed}}
 
   \pagestyle{head}
-
   \headrule
-  \header{\textbf{\myclass}}%
-  {\textbf{\myname}}%
-  {\textbf{\myhwtype}}
+  \extraheadheight{0.5in}
+  \header{\textbf{\myclass}\\ \textbf{\myname}\\ \textbf{\myhwtype}}{}{}
 
   \begin{document}
+      % Remove the next line if you want the header on page 1 as well
       \thispagestyle{plain}
+
       \begin{center}
         {\Large \myclass{} \myhwtype{}} \\
-        \myname{}\\
+        \myname{} \\
         \today
       \end{center}
-      
+
       \begin{numedquestion}
-      \end{numedquestion} 
-  \end{document} 
+      \end{numedquestion}
+  \end{document}
