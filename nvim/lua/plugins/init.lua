@@ -59,6 +59,17 @@ return {
             require "configs.vimtex"
         end,
     },
+    {
+        "mfussenegger/nvim-dap",
+        ft = "asm",
+        dependencies = {
+            "rcarriga/nvim-dap-ui",
+            "nvim-neotest/nvim-nio",
+        },
+        config = function()
+            require "configs.dap"
+        end,
+    },
     -- test new blink
     -- { import = "nvchad.blink.lazyspec" },
 

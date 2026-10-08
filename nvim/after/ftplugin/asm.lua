@@ -1,0 +1,64 @@
+-- ARMv7-A big-endian assembly (GNU as)
+-- Toolchain: arm-none-eabi-gcc (assembler + linker), qemu-armeb (runner), gdb (debugger)
+local arm = require "configs.arm"
+
+vim.bo.commentstring = "@ %s"
+vim.bo.expandtab = false -- assembly traditionally uses tabs for column alignment
+vim.bo.shiftwidth = 8
+vim.bo.tabstop = 8
+vim.bo.softtabstop = 8
+
+local function term(cmd)
+    vim.cmd "write"
+    vim.cmd("botright 15split | terminal sh -c " .. vim.fn.shellescape(cmd))
+    vim.cmd "startinsert"
+end
+
+local function bin()
+    local _, out = arm.paths()
+    return vim.fn.shellescape(out)
+end
+
+local function run_cmd()
+    return string.format("%s && qemu-armeb %s; echo; echo \"[exit code: $?]\"", arm.build_cmd(), bin())
+end
+
+-- plain gdb in a terminal (the UI debugger is <leader>ad / F5)
+local function gdb_cmd()
+    return string.format(
+        "%s && { qemu-armeb -g %d %s & gdb -q %s -ex 'target remote :%d' -ex 'layout regs'; }",
+        arm.build_cmd(),
+        arm.GDB_PORT,
+        bin(),
+        bin(),
+        arm.GDB_PORT
+    )
+end
+
+local function objdump_cmd()
+    return string.format("%s && arm-none-eabi-objdump -d %s | less", arm.build_cmd(), bin())
+end
+
+vim.api.nvim_buf_create_user_command(0, "ArmBuild", function()
+    term(arm.build_cmd())
+end, { desc = "Build ARMv7 BE assembly" })
+vim.api.nvim_buf_create_user_command(0, "ArmRun", function()
+    term(run_cmd())
+end, { desc = "Build and run in qemu-armeb" })
+vim.api.nvim_buf_create_user_command(0, "ArmGdb", function()
+    term(gdb_cmd())
+end, { desc = "Build and debug with gdb in a terminal" })
+vim.api.nvim_buf_create_user_command(0, "ArmDump", function()
+    term(objdump_cmd())
+end, { desc = "Build and disassemble" })
+
+local map = function(lhs, rhs, desc)
+    vim.keymap.set("n", lhs, rhs, { buffer = true, desc = desc })
+end
+map("<leader>ab", "<cmd>ArmBuild<cr>", "ARM build")
+map("<leader>ar", "<cmd>ArmRun<cr>", "ARM run (qemu-armeb)")
+map("<leader>ad", function()
+    require("dap").continue()
+end, "ARM debug (UI)")
+map("<leader>ag", "<cmd>ArmGdb<cr>", "ARM debug (gdb terminal)")
+map("<leader>ao", "<cmd>ArmDump<cr>", "ARM objdump")

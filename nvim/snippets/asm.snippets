@@ -1,0 +1,36 @@
+snippet start "ARMv7 BE program skeleton (Linux syscalls)"
+	@ ARMv7-A, big endian, Linux EABI syscalls
+		.syntax unified
+		.arch armv7-a
+		.arm
+	
+		.section .data
+	msg:	.asciz "${1:Hello, ARM!}\n"
+		len = . - msg
+	
+		.section .text
+		.global _start
+	_start:
+		mov	r0, #1		@ fd = stdout
+		ldr	r1, =msg	@ buf
+		mov	r2, #len	@ count
+		mov	r7, #4		@ sys_write
+		svc	#0
+	
+		${0}
+	
+		mov	r0, #0		@ status
+		mov	r7, #1		@ sys_exit
+		svc	#0
+snippet fn "function with prologue/epilogue"
+	@ ${1:name}: ${2:description}
+		.global $1
+		.type	$1, %function
+	$1:
+		push	{r4-r11, lr}
+		${0}
+		pop	{r4-r11, pc}
+		.size	$1, . - $1
+snippet sys "linux syscall"
+		mov	r7, #${1:4}
+		svc	#0

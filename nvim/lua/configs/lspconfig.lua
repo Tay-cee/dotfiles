@@ -9,6 +9,7 @@ local lspconfig = require "nvchad.configs.lspconfig" -- nvim 0.11
 lspconfig.servers = {
     "lua_ls",
     "clangd",
+    "asm_lsp",
 }
 
 -- list of servers configured with default config.
@@ -60,3 +61,14 @@ vim.lsp.config("clangd", { -- nvim 0.11
     on_init = on_init,
     capabilities = capabilities,
 })
+
+-- ARM assembly: target/flags come from ~/.config/asm-lsp/.asm-lsp.toml
+-- (or a per-project .asm-lsp.toml in the project root)
+vim.lsp.config("asm_lsp", {
+    on_attach = on_attach,
+    on_init = on_init,
+    capabilities = capabilities,
+    filetypes = { "asm", "vmasm" },
+    root_markers = { ".asm-lsp.toml", "Makefile", ".git" },
+})
+vim.lsp.enable "asm_lsp"
