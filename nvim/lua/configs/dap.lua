@@ -11,6 +11,7 @@ local function stop_qemu()
         qemu:kill "sigterm"
         qemu = nil
     end
+    arm.cleanup()
 end
 
 -- ask the OS for an unused TCP port so sessions never clash on a fixed one
@@ -41,15 +42,15 @@ local function build_and_launch(config, on_config)
             end)
         end
     end
-    qemu = vim.system({ "qemu-armeb", "-g", tostring(port), bin }, { stdout = to_repl, stderr = to_repl })
-    vim.wait(300) -- let qemu open the gdb port
+    qemu = vim.system(arm.qemu_argv(bin, port), { stdout = to_repl, stderr = to_repl })
+    arm.wait_for_qemu()
 
     on_config(vim.tbl_extend("force", config, { program = bin, target = "localhost:" .. port }))
 end
 
 dap.adapters.gdb = {
     type = "executable",
-    command = "gdb",
+    command = arm.GDB,
     -- output-radix 16: show registers, watches and prints in hex (like uVision)
     args = { "-q", "-i", "dap", "-ex", "set output-radix 16" },
     enrich_config = build_and_launch,
@@ -57,7 +58,7 @@ dap.adapters.gdb = {
 
 dap.configurations.asm = {
     {
-        name = "ARMv7 BE (qemu-armeb)",
+        name = arm.is_mac and "ARMv7 BE (qemu-armeb in Docker)" or "ARMv7 BE (qemu-armeb)",
         type = "gdb",
         request = "attach",
     },

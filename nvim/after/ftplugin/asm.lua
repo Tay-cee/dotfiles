@@ -16,21 +16,26 @@ end
 
 local function bin()
     local _, out = arm.paths()
-    return vim.fn.shellescape(out)
+    return out
 end
 
 local function run_cmd()
-    return string.format("%s && qemu-armeb %s; echo; echo \"[exit code: $?]\"", arm.build_cmd(), bin())
+    return string.format(
+        "%s && %s; echo; echo \"[exit code: $?]\"",
+        arm.build_cmd(),
+        arm.qemu_cmd(bin(), nil, true)
+    )
 end
 
 -- plain gdb in a terminal (the UI debugger is <leader>ad / F5)
 local function gdb_cmd()
     return string.format(
-        "%s && { qemu-armeb -g %d %s & gdb -q %s -ex 'target remote :%d' -ex 'layout regs'; }",
+        "%s && { %s & %s; %s -q %s -ex 'target remote :%d' -ex 'layout regs'; }",
         arm.build_cmd(),
-        arm.GDB_PORT,
-        bin(),
-        bin(),
+        arm.qemu_cmd(bin(), arm.GDB_PORT),
+        arm.wait_for_qemu_cmd(),
+        arm.GDB,
+        vim.fn.shellescape(bin()),
         arm.GDB_PORT
     )
 end
