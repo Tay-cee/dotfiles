@@ -142,6 +142,7 @@ map("n", "<leader>dq", function()
     dapui.close()
 end, { desc = "Debug stop" })
 map("n", "<leader>dc", dap.run_to_cursor, { desc = "Debug run to cursor" })
+map("n", "<C-F10>", dap.run_to_cursor, { desc = "Debug run to cursor line" })
 map("n", "<leader>du", function()
     dapui.toggle { reset = true }
     vim.schedule(uv.set_titles)
