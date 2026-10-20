@@ -1,0 +1,18 @@
+# Global asm-lsp config: GNU as, 32-bit ARM (ARMv7-A, big endian).
+# Override per project by dropping a .asm-lsp.toml in the project root.
+[default_config]
+version = "0.10.1"
+assembler = "gas"
+instruction_set = "arm"
+
+[default_config.opts]
+compiler = "arm-none-eabi-gcc"
+compile_flags_txt = [
+    "-x", "assembler-with-cpp",
+    "-march=armv7-a",
+    "-mbig-endian",
+    "-c",
+    "-o", "/dev/null",
+]
+diagnostics = true
+default_diagnostics = false
