@@ -20,11 +20,7 @@ local function bin()
 end
 
 local function run_cmd()
-    return string.format(
-        "%s && %s; echo; echo \"[exit code: $?]\"",
-        arm.build_cmd(),
-        arm.qemu_cmd(bin(), nil, true)
-    )
+    return string.format('%s && %s; echo; echo "[exit code: $?]"', arm.build_cmd(), arm.qemu_cmd(bin(), nil, true))
 end
 
 -- plain gdb in a terminal (the UI debugger is <leader>ad / F5)
@@ -46,7 +42,7 @@ end
 
 -- every label with its address (hex), sorted by address
 local function syms_cmd()
-    return string.format("%s && arm-none-eabi-nm -n %s | less", arm.build_cmd(), bin())
+    return string.format("%s && arm-none-eabi-nm -n '%s' | less", arm.build_cmd(), bin())
 end
 
 vim.api.nvim_buf_create_user_command(0, "ArmBuild", function()
