@@ -44,6 +44,11 @@ local function objdump_cmd()
     return string.format("%s && arm-none-eabi-objdump -d %s | less", arm.build_cmd(), bin())
 end
 
+-- every label with its address (hex), sorted by address
+local function syms_cmd()
+    return string.format("%s && arm-none-eabi-nm -n %s | less", arm.build_cmd(), bin())
+end
+
 vim.api.nvim_buf_create_user_command(0, "ArmBuild", function()
     term(arm.build_cmd())
 end, { desc = "Build ARMv7 BE assembly" })
@@ -56,6 +61,9 @@ end, { desc = "Build and debug with gdb in a terminal" })
 vim.api.nvim_buf_create_user_command(0, "ArmDump", function()
     term(objdump_cmd())
 end, { desc = "Build and disassemble" })
+vim.api.nvim_buf_create_user_command(0, "ArmSyms", function()
+    term(syms_cmd())
+end, { desc = "Build and list label addresses" })
 
 local map = function(lhs, rhs, desc)
     vim.keymap.set("n", lhs, rhs, { buffer = true, desc = desc })
@@ -67,3 +75,4 @@ map("<leader>ad", function()
 end, "ARM debug (UI)")
 map("<leader>ag", "<cmd>ArmGdb<cr>", "ARM debug (gdb terminal)")
 map("<leader>ao", "<cmd>ArmDump<cr>", "ARM objdump")
+map("<leader>as", "<cmd>ArmSyms<cr>", "ARM label addresses")
