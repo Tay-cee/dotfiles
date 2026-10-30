@@ -35,15 +35,24 @@ local function build_and_launch(config, on_config)
     local _, bin = arm.paths()
     local port = free_port()
     stop_qemu()
+    local output = {} -- kept so a failed start can be reported (the REPL isn't open yet)
     local function to_repl(_, data)
         if data then
+            table.insert(output, data)
             vim.schedule(function()
                 dap.repl.append(data)
             end)
         end
     end
     qemu = vim.system(arm.qemu_argv(bin, port), { stdout = to_repl, stderr = to_repl })
-    arm.wait_for_qemu()
+    if not arm.wait_for_qemu(qemu) then
+        stop_qemu()
+        vim.notify(
+            "qemu-armeb container did not start (run :ArmSetup if the image is missing):\n" .. table.concat(output),
+            vim.log.levels.ERROR
+        )
+        return
+    end
 
     on_config(vim.tbl_extend("force", config, { program = bin, target = "localhost:" .. port }))
 end

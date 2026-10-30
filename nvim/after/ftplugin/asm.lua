@@ -10,7 +10,13 @@ vim.bo.softtabstop = 8
 
 local function term(cmd)
     vim.cmd "write"
-    vim.cmd("botright 15split | terminal sh -c " .. vim.fn.shellescape(cmd))
+    -- start the job directly: :terminal truncates commands over 1024 bytes (long paths)
+    vim.cmd "botright 15new"
+    if vim.fn.has "nvim-0.11" == 1 then
+        vim.fn.jobstart({ "sh", "-c", cmd }, { term = true })
+    else
+        vim.fn.termopen { "sh", "-c", cmd }
+    end
     vim.cmd "startinsert"
 end
 
@@ -37,12 +43,12 @@ local function gdb_cmd()
 end
 
 local function objdump_cmd()
-    return string.format("%s && arm-none-eabi-objdump -d %s | less", arm.build_cmd(), bin())
+    return string.format("%s && arm-none-eabi-objdump -d %s | less", arm.build_cmd(), vim.fn.shellescape(bin()))
 end
 
 -- every label with its address (hex), sorted by address
 local function syms_cmd()
-    return string.format("%s && arm-none-eabi-nm -n '%s' | less", arm.build_cmd(), bin())
+    return string.format("%s && arm-none-eabi-nm -n %s | less", arm.build_cmd(), vim.fn.shellescape(bin()))
 end
 
 vim.api.nvim_buf_create_user_command(0, "ArmBuild", function()

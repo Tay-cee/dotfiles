@@ -2,7 +2,8 @@
 local M = {}
 
 M.CC = "arm-none-eabi-gcc"
-M.CFLAGS = { "-march=armv7-a", "-marm", "-mbig-endian", "-nostdlib", "-static", "-g", "-Wl,--be8" }
+-- -Ttext=0: code starts at address 0 like Keil uVision, so label addresses match it
+M.CFLAGS = { "-march=armv7-a", "-marm", "-mbig-endian", "-nostdlib", "-static", "-g", "-Wl,--be8", "-Wl,-Ttext=0" }
 M.GDB_PORT = 1234
 
 -- macOS has no qemu user-mode emulation, so qemu-armeb runs in a Linux container
@@ -74,19 +75,25 @@ function M.qemu_cmd(bin, port, tty)
     return shell(M.qemu_argv(bin, port, tty))
 end
 
--- block until qemu's gdb stub can accept a connection
-function M.wait_for_qemu()
+-- block until qemu's gdb stub can accept a connection; false if the container never came up
+function M.wait_for_qemu(proc)
     if not M.is_mac then
         vim.wait(300)
-        return
+        return true
     end
     -- docker's port proxy accepts before qemu listens, so wait for the container instead
+    local running = false
     vim.wait(10000, function()
+        if proc and proc:is_closing() then
+            return true -- docker run already exited: the container failed to start
+        end
         local res = vim.system({ "docker", "inspect", "-f", "{{.State.Running}}", M.CONTAINER }, { text = true })
             :wait()
-        return vim.trim(res.stdout or "") == "true"
+        running = vim.trim(res.stdout or "") == "true"
+        return running
     end, 100)
     vim.wait(300)
+    return running
 end
 
 -- shell snippet that does the same, for :terminal commands
