@@ -47,7 +47,7 @@ folder has a `Makefile`, `make` is used instead of the built-in compile command.
 | `<leader>as` | `:ArmSyms` | Build and list every label with its address in hex |
 | | `:ArmSetup` | macOS only: build the qemu Docker image |
 
-Output opens in a terminal split at the bottom. In `less` (`ArmDump`, `ArmSyms`) press `q` to quit.
+Output opens in a split at the bottom; press `q` to close the `ArmDump` and `ArmSyms` views.
 `Ctrl-C` stops a program that loops forever.
 
 **Build flags:** `-march=armv7-a -marm -mbig-endian -nostdlib -static -g -Wl,--be8 -Wl,-Ttext=0`.
@@ -56,7 +56,7 @@ addresses as Keil. GNU's `.word`/`.hword` don't align by themselves, unlike Keil
 `DCD`/`DCW`. Add `.balign 4` / `.balign 2` before them so the addresses match.
 
 `<leader>as` output: `t`/`T` = in `.text`, `d`/`D` = in `.data`; uppercase = `.global`.
-Names starting with `_` (`_end`, `_stack`, …) come from the linker.
+Linker-defined names (`_end`, `_stack`, …) are hidden; `_start` is kept.
 
 ## Debugger
 

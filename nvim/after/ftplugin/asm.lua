@@ -46,9 +46,30 @@ local function objdump_cmd()
     return string.format("%s && arm-none-eabi-objdump -d %s | less", arm.build_cmd(), vim.fn.shellescape(bin()))
 end
 
--- every label with its address (hex), sorted by address
-local function syms_cmd()
-    return string.format("%s && arm-none-eabi-nm -n %s | less", arm.build_cmd(), vim.fn.shellescape(bin()))
+-- every label with its address (hex), sorted by address, in a split sized to fit (q closes)
+local function show_syms()
+    vim.cmd "write"
+    local res = vim.system(arm.build_argv(), { text = true }):wait()
+    if res.code ~= 0 then
+        vim.notify("Build failed:\n" .. res.stderr .. res.stdout, vim.log.levels.ERROR)
+        return
+    end
+    res = vim.system({ "arm-none-eabi-nm", "-n", bin() }, { text = true }):wait()
+    local lines = {}
+    for _, line in ipairs(vim.split(res.stdout or "", "\n", { trimempty = true })) do
+        local name = line:match "%S+$"
+        -- skip linker-defined symbols (_end, __bss_start, _stack, ...)
+        if name == "_start" or not name:match "^_" then
+            table.insert(lines, line)
+        end
+    end
+
+    vim.cmd("botright " .. math.min(math.max(#lines, 1), 30) .. "new")
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+    vim.bo.buftype = "nofile"
+    vim.bo.bufhidden = "wipe"
+    vim.bo.modifiable = false
+    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = true, desc = "Close label addresses" })
 end
 
 vim.api.nvim_buf_create_user_command(0, "ArmBuild", function()
@@ -63,9 +84,7 @@ end, { desc = "Build and debug with gdb in a terminal" })
 vim.api.nvim_buf_create_user_command(0, "ArmDump", function()
     term(objdump_cmd())
 end, { desc = "Build and disassemble" })
-vim.api.nvim_buf_create_user_command(0, "ArmSyms", function()
-    term(syms_cmd())
-end, { desc = "Build and list label addresses" })
+vim.api.nvim_buf_create_user_command(0, "ArmSyms", show_syms, { desc = "Build and list label addresses" })
 
 local map = function(lhs, rhs, desc)
     vim.keymap.set("n", lhs, rhs, { buffer = true, desc = desc })
