@@ -26,6 +26,27 @@ function M.paths()
     return vim.fn.expand "%:p", vim.fn.expand "%:p:r"
 end
 
+-- Keil-style ALIGN: `.align n` pads to n bytes (GNU's means 2^n), bare `.align` = 4.
+-- Rewrites a line's code part (before any @ comment) to use `.balign`.
+local function keil_align(line)
+    local code, comment = line:match "^([^@]*)(.*)$"
+    code = code:gsub("%.[Aa][Ll][Ii][Gg][Nn]%f[%s%z]%s*$", ".balign 4")
+    code = code:gsub("%.[Aa][Ll][Ii][Gg][Nn]%f[%s]", ".balign")
+    return code .. comment
+end
+
+-- copy of src with Keil alignment; the `# 1` line marker keeps errors and
+-- debug info pointing at the real file and line numbers
+local function keil_source(src)
+    local lines = { string.format('# 1 "%s"', src) }
+    for _, line in ipairs(vim.fn.readfile(src)) do
+        table.insert(lines, keil_align(line))
+    end
+    local tmp = vim.fn.tempname() .. ".s"
+    vim.fn.writefile(lines, tmp)
+    return tmp
+end
+
 -- build command as a list (for vim.system)
 function M.build_argv()
     if M.has_makefile() then
@@ -34,7 +55,7 @@ function M.build_argv()
     local src, out = M.paths()
     local argv = { M.CC }
     vim.list_extend(argv, M.CFLAGS)
-    vim.list_extend(argv, { src, "-o", out })
+    vim.list_extend(argv, { "-x", "assembler", keil_source(src), "-o", out })
     return argv
 end
 

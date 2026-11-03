@@ -53,7 +53,11 @@ Output opens in a split at the bottom; press `q` to close the `ArmDump` and `Arm
 **Build flags:** `-march=armv7-a -marm -mbig-endian -nostdlib -static -g -Wl,--be8 -Wl,-Ttext=0`.
 Code is linked at address **0**, like Keil uVision, so `<leader>as` shows the same label
 addresses as Keil. GNU's `.word`/`.hword` don't align by themselves, unlike Keil's
-`DCD`/`DCW`. Add `.balign 4` / `.balign 2` before them so the addresses match.
+`DCD`/`DCW`. Add `.align 4` / `.align 2` before them so the addresses match.
+
+**`.align` works like Keil's `ALIGN`:** `.align n` pads to **n bytes** (in plain GNU `as`
+it means 2^n), and a bare `.align` pads to 4. The build rewrites it to `.balign` in a temp
+copy, so errors and the debugger still point at your file. Makefile builds aren't changed.
 
 `<leader>as` output: `t`/`T` = in `.text`, `d`/`D` = in `.data`; uppercase = `.global`.
 Linker-defined names (`_end`, `_stack`, …) are hidden; `_start` is kept.
